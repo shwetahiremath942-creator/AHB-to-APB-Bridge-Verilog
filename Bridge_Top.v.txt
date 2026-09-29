@@ -1,0 +1,77 @@
+`timescale 1ns/1ps
+
+module Bridge_Top(
+    Hclk,
+    Hresetn,
+    Hwrite,
+    Hreadyin,
+    Hreadyout,
+    Hwdata,
+    Haddr,
+    Htrans,
+    Prdata,
+    Penable,
+    Pwrite,
+    Pselx,
+    Paddr,
+    Pwdata,
+    Hresp,
+    Hrdata
+);
+
+input Hclk, Hresetn, Hwrite, Hreadyin;
+input [31:0] Hwdata, Haddr, Prdata;
+input [1:0] Htrans;
+
+output Penable, Pwrite, Hreadyout;
+output [2:0] Pselx;
+output [31:0] Paddr, Pwdata, Hrdata;
+output [1:0] Hresp;
+
+wire valid, Hwritereg;
+wire [31:0] Haddr1, Haddr2, Hwdata1, Hwdata2;
+wire [2:0] tempselx;
+
+AHB_slave_interface AHBSlave (
+    .Hclk(Hclk),
+    .Hresetn(Hresetn),
+    .Hwrite(Hwrite),
+    .Hreadyin(Hreadyin),
+    .Htrans(Htrans),
+    .Haddr(Haddr),
+    .Hwdata(Hwdata),
+    .Prdata(Prdata),
+    .valid(valid),
+    .Haddr1(Haddr1),
+    .Haddr2(Haddr2),
+    .Hwdata1(Hwdata1),
+    .Hwdata2(Hwdata2),
+    .Hrdata(Hrdata),
+    .Hwritereg(Hwritereg),
+    .tempselx(tempselx),
+    .Hresp(Hresp)
+);
+
+APB_FSM_Controller APBControl (
+    .Hclk(Hclk),
+    .Hresetn(Hresetn),
+    .valid(valid),
+    .Haddr1(Haddr1),
+    .Haddr2(Haddr2),
+    .Hwdata1(Hwdata1),
+    .Hwdata2(Hwdata2),
+    .Prdata(Prdata),
+    .Hwrite(Hwrite),
+    .Haddr(Haddr),
+    .Hwdata(Hwdata),
+    .Hwritereg(Hwritereg),
+    .tempselx(tempselx),
+    .Pwrite(Pwrite),
+    .Penable(Penable),
+    .Pselx(Pselx),
+    .Paddr(Paddr),
+    .Pwdata(Pwdata),
+    .Hreadyout(Hreadyout)
+);
+
+endmodule

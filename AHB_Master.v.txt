@@ -1,0 +1,64 @@
+`timescale 1ns/1ps
+
+module AHB_Master(
+    Hclk,
+    Hresetn,
+    Hresp,
+    Hrdata,
+    Hwrite,
+    Hreadyin,
+    Hreadyout,
+    Htrans,
+    Hwdata,
+    Haddr
+);
+
+input Hclk, Hresetn, Hreadyout;
+input [1:0] Hresp;
+input [31:0] Hrdata;
+
+output reg Hwrite, Hreadyin;
+output reg [1:0] Htrans;
+output reg [31:0] Hwdata, Haddr;
+
+reg [2:0] Hburst;
+reg [2:0] Hsize;
+
+// SINGLE WRITE TASK
+task single_write;
+begin
+    @(posedge Hclk);
+    #2;
+    Hwrite   = 1'b1;
+    Htrans   = 2'b10;
+    Hsize    = 3'b000;
+    Hburst   = 3'b000;
+    Hreadyin = 1'b1;
+    Haddr    = 32'h8000_0001;
+
+    @(posedge Hclk);
+    #2;
+    Htrans = 2'b00;
+    Hwdata = 32'h0000_00A3;
+end
+endtask
+
+// SINGLE READ TASK
+task single_read;
+begin
+    @(posedge Hclk);
+    #2;
+    Hwrite   = 1'b0;
+    Htrans   = 2'b10;
+    Hsize    = 3'b000;
+    Hburst   = 3'b000;
+    Hreadyin = 1'b1;
+    Haddr    = 32'h8000_00A2;
+
+    @(posedge Hclk);
+    #2;
+    Htrans = 2'b00;
+end
+endtask
+
+endmodule

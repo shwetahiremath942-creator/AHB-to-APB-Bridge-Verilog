@@ -1,0 +1,53 @@
+`timescale 1ns/1ps
+
+module top;
+
+reg Hclk, Hresetn;
+wire Hwrite, Hreadyin, Hreadyout, Penable, Pwrite;
+wire [1:0] Htrans, Hresp;
+wire [31:0] Haddr, Hwdata, Hrdata, Paddr, Pwdata, Prdata;
+wire [2:0] Pselx;
+
+initial begin
+    Hclk = 1'b0;
+    forever #5 Hclk = ~Hclk;
+end
+
+initial begin
+    Hresetn = 1'b0;
+    #15;
+    Hresetn = 1'b1;
+end
+
+AHB_Master Master (
+    .Hclk(Hclk), .Hresetn(Hresetn), .Hresp(Hresp), .Hrdata(Hrdata),
+    .Hwrite(Hwrite), .Hreadyin(Hreadyin), .Hreadyout(Hreadyout),
+    .Htrans(Htrans), .Hwdata(Hwdata), .Haddr(Haddr)
+);
+
+Bridge_Top Bridge (
+    .Hclk(Hclk), .Hresetn(Hresetn), .Hwrite(Hwrite), .Hreadyin(Hreadyin),
+    .Hreadyout(Hreadyout), .Hwdata(Hwdata), .Haddr(Haddr), .Htrans(Htrans),
+    .Prdata(Prdata), .Penable(Penable), .Pwrite(Pwrite), .Pselx(Pselx),
+    .Paddr(Paddr), .Pwdata(Pwdata), .Hresp(Hresp), .Hrdata(Hrdata)
+);
+
+APB_Interface APB (
+    .Pwrite(Pwrite), .Pselx(Pselx), .Penable(Penable), .Paddr(Paddr),
+    .Pwdata(Pwdata), .Pwriteout(), .Pselxout(), .Penableout(),
+    .Paddrout(), .Pwdataout(), .Prdata(Prdata)
+);
+
+initial begin
+    #20;
+    Master.single_write();
+    #100;
+    $finish;
+end
+
+initial begin
+    $dumpfile("dump.vcd");
+    $dumpvars(0, top);
+end
+
+endmodule
